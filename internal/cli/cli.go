@@ -36,6 +36,8 @@ Flags:
   --token string   CircleCI API token (or set $CIRCLE_TOKEN / $CIRCLECI_TOKEN).
                    Required for private orbs and to avoid registry rate limits.
   --check          Don't write changes; exit non-zero if any file is not pinned.
+  --update         Update every orb to its latest released version, ignoring the
+                   existing version constraint and upgrading already-pinned orbs.
 `
 
 // Main is the entry point. version is the build version stamped into the
@@ -67,6 +69,7 @@ func runCmd(args []string, stdout, stderr io.Writer) int {
 	fs.Usage = func() { fmt.Fprint(stderr, usage) }
 	token := fs.String("token", "", "CircleCI API token")
 	check := fs.Bool("check", false, "verify only; do not write")
+	update := fs.Bool("update", false, "update orbs to their latest released version")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -92,7 +95,7 @@ func runCmd(args []string, stdout, stderr io.Writer) int {
 			return 1
 		}
 
-		res, err := pinner.Pin(ctx, string(src), client)
+		res, err := pinner.Pin(ctx, string(src), client, pinner.Options{Update: *update})
 		if err != nil {
 			fmt.Fprintf(stderr, "pinorb: %s: %v\n", path, err)
 			return 1

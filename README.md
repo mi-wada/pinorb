@@ -37,6 +37,9 @@ pinorb run path/to/config.yml path/to/dir
 
 # Verify only — don't write; exit non-zero if anything is unpinned (CI-friendly).
 pinorb run --check
+
+# Update every orb to its latest released version (upgrades already-pinned orbs).
+pinorb run --update
 ```
 
 Each path may be a file or a directory; directories are searched recursively
@@ -58,6 +61,11 @@ For each orb declaration inside an `orbs:` block:
 | `circleci/continuation@volatile`| left unchanged (non-numeric tag)            |
 
 Comments, formatting, and everything outside `orbs:` blocks are preserved.
+
+With `--update`, the version constraint is ignored and every numeric orb is
+bumped to its absolute latest release — so `circleci/aws-cli@5.1` and an
+already-pinned `circleci/slack@4.13.3` both jump to the newest version. Only
+non-numeric tags (e.g. `volatile`, `dev:...`) are still left untouched.
 
 ## Authentication
 
