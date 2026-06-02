@@ -74,7 +74,9 @@ pinorb run
 
 ## Releasing
 
-Releases are automated. [tagpr](https://github.com/Songmu/tagpr) keeps a release
-PR open; merging it tags the next version, and that tag triggers
-[GoReleaser](https://goreleaser.com) to build binaries and publish the Homebrew
-cask to [mi-wada/homebrew-tap](https://github.com/mi-wada/homebrew-tap).
+Releases are automated by a single workflow. [tagpr](https://github.com/Songmu/tagpr)
+keeps a release PR open; merging it tags the next version, and the same run then
+invokes [GoReleaser](https://goreleaser.com) to build binaries and publish the
+Homebrew cask to [mi-wada/homebrew-tap](https://github.com/mi-wada/homebrew-tap).
+The only secret required is `HOMEBREW_TAP_TOKEN` (a token with write access to
+the tap repository).
