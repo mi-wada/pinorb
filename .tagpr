@@ -1,0 +1,8 @@
+[tagpr]
+    vPrefix = true
+    releaseBranch = main
+    # Version is derived from git tags only; it is stamped into the binary at
+    # build time via -ldflags, so no in-repo version file is needed.
+    versionFile = -
+    # The GitHub Release is created by GoReleaser on the tag, not by tagpr.
+    release = false

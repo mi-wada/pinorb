@@ -1,0 +1,24 @@
+name: tagpr
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  tagpr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: Songmu/tagpr@v1
+        env:
+          # A PAT (not the default GITHUB_TOKEN) so the tag tagpr pushes
+          # triggers the release workflow. Can reuse the homebrew-tap PAT if it
+          # also has Contents:write on this repo.
+          GITHUB_TOKEN: ${{ secrets.TAGPR_TOKEN }}

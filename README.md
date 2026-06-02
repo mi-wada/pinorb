@@ -71,3 +71,10 @@ pinorb run --token "$CIRCLE_TOKEN"
 export CIRCLE_TOKEN=...   # CIRCLECI_TOKEN is also accepted
 pinorb run
 ```
+
+## Releasing
+
+Releases are automated. [tagpr](https://github.com/Songmu/tagpr) keeps a release
+PR open; merging it tags the next version, and that tag triggers
+[GoReleaser](https://goreleaser.com) to build binaries and publish the Homebrew
+cask to [mi-wada/homebrew-tap](https://github.com/mi-wada/homebrew-tap).
