@@ -25,6 +25,7 @@ const usage = `pinorb pins CircleCI orbs to an exact patch version.
 
 Usage:
   pinorb run [flags] [paths...]
+  pinorb version
 
 Each path may be a file or a directory; directories are searched recursively
 for *.yml / *.yaml. If no paths are given, the .circleci/ directory is searched
@@ -37,8 +38,9 @@ Flags:
   --check          Don't write changes; exit non-zero if any file is not pinned.
 `
 
-// Main is the entry point. It returns a process exit code.
-func Main(args []string, stdout, stderr io.Writer) int {
+// Main is the entry point. version is the build version stamped into the
+// binary. It returns a process exit code.
+func Main(version string, args []string, stdout, stderr io.Writer) int {
 	if len(args) < 1 {
 		fmt.Fprint(stderr, usage)
 		return 2
@@ -47,6 +49,9 @@ func Main(args []string, stdout, stderr io.Writer) int {
 	switch args[0] {
 	case "run":
 		return runCmd(args[1:], stdout, stderr)
+	case "version", "-v", "--version":
+		fmt.Fprintf(stdout, "pinorb %s\n", version)
+		return 0
 	case "-h", "--help", "help":
 		fmt.Fprint(stdout, usage)
 		return 0

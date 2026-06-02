@@ -12,9 +12,19 @@ is reproducible.
 
 ## Install
 
+Homebrew:
+
+```sh
+brew install mi-wada/tap/pinorb
+```
+
+Go:
+
 ```sh
 go install github.com/mi-wada/pinorb@latest
 ```
+
+Or download a prebuilt binary from the [releases page](https://github.com/mi-wada/pinorb/releases).
 
 ## Usage
 
