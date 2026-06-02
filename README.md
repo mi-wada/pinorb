@@ -19,15 +19,21 @@ go install github.com/mi-wada/pinorb@latest
 ## Usage
 
 ```sh
-# Pin orbs in .circleci/config.yml (the default).
+# Search the .circleci/ directory (the default).
 pinorb run
 
-# Pin specific files.
-pinorb run path/to/config.yml another/config.yml
+# Pin specific files or directories (directories are searched recursively).
+pinorb run path/to/config.yml path/to/dir
 
 # Verify only — don't write; exit non-zero if anything is unpinned (CI-friendly).
 pinorb run --check
 ```
+
+Each path may be a file or a directory; directories are searched recursively
+for `*.yml` / `*.yaml`. With no path, `pinorb` searches `.circleci/` (falling
+back to `.circleci/config.yml`), so both single-file configs and split
+[setup-workflow](https://circleci.com/docs/dynamic-config/) configs
+(`.circleci/config/*.yml`) are handled automatically.
 
 ### What it does
 

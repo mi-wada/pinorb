@@ -6,20 +6,30 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/mi-wada/pinorb/internal/pinner"
 	"github.com/mi-wada/pinorb/internal/registry"
 )
 
-const defaultConfigPath = ".circleci/config.yml"
+const (
+	defaultConfigPath = ".circleci/config.yml"
+	defaultConfigDir  = ".circleci"
+)
 
 const usage = `pinorb pins CircleCI orb versions to an exact patch version.
 
 Usage:
-  pinorb run [flags] [files...]
+  pinorb run [flags] [paths...]
 
-If no files are given, .circleci/config.yml is used.
+Each path may be a file or a directory; directories are searched recursively
+for *.yml / *.yaml. If no paths are given, the .circleci/ directory is searched
+(falling back to .circleci/config.yml). This covers both single-file configs
+and split "setup workflow" configs (.circleci/config/*.yml).
 
 Flags:
   --token string   CircleCI API token (or set $CIRCLE_TOKEN / $CIRCLECI_TOKEN).
@@ -56,9 +66,10 @@ func runCmd(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 
-	files := fs.Args()
-	if len(files) == 0 {
-		files = []string{defaultConfigPath}
+	files, err := collectFiles(fs.Args())
+	if err != nil {
+		fmt.Fprintf(stderr, "pinorb: %v\n", err)
+		return 1
 	}
 
 	if *token == "" {
@@ -104,6 +115,60 @@ func runCmd(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 	return 0
+}
+
+// collectFiles expands the given paths into a de-duplicated, sorted list of
+// config files. Directories are walked recursively for *.yml / *.yaml. With no
+// paths, it defaults to the .circleci/ directory, falling back to
+// .circleci/config.yml when that directory is absent.
+func collectFiles(paths []string) ([]string, error) {
+	if len(paths) == 0 {
+		if fi, err := os.Stat(defaultConfigDir); err == nil && fi.IsDir() {
+			paths = []string{defaultConfigDir}
+		} else {
+			// No .circleci/ at all: return the canonical path and let the
+			// caller surface a clear "no such file" error on read.
+			return []string{defaultConfigPath}, nil
+		}
+	}
+
+	seen := map[string]bool{}
+	var files []string
+	add := func(p string) {
+		if !seen[p] {
+			seen[p] = true
+			files = append(files, p)
+		}
+	}
+
+	for _, p := range paths {
+		fi, err := os.Stat(p)
+		if err != nil {
+			return nil, err
+		}
+		if !fi.IsDir() {
+			add(p)
+			continue
+		}
+		err = filepath.WalkDir(p, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				return nil
+			}
+			if ext := strings.ToLower(filepath.Ext(path)); ext == ".yml" || ext == ".yaml" {
+				add(path)
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	sort.Strings(files)
+	return files, nil
 }
 
 func firstEnv(keys ...string) string {
