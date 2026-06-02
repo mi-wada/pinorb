@@ -29,6 +29,14 @@ type Result struct {
 	Changes []Change
 }
 
+// Options tunes how Pin resolves orb versions.
+type Options struct {
+	// Update resolves every orb to its absolute latest released version,
+	// ignoring the existing version constraint and upgrading already-pinned
+	// versions. Non-numeric tags (e.g. "volatile") are still left untouched.
+	Update bool
+}
+
 var orbsBlockStart = regexp.MustCompile(`^(\s*)orbs:\s*(?:#.*)?$`)
 
 // indentWidth returns the number of leading whitespace characters.
@@ -36,10 +44,15 @@ func indentWidth(s string) int {
 	return len(s) - len(strings.TrimLeft(s, " \t"))
 }
 
+// latestSpec matches any released version, so Resolve picks the highest.
+var latestSpec, _ = orb.ParseVersion("latest")
+
 // Pin rewrites content, resolving every partially-specified orb version inside
 // `orbs:` blocks to its latest matching patch version. Already-pinned orbs and
-// non-numeric versions (e.g. "volatile", "dev:...") are left untouched.
-func Pin(ctx context.Context, content string, r Resolver) (Result, error) {
+// non-numeric versions (e.g. "volatile", "dev:...") are left untouched. With
+// opts.Update, every numeric orb is instead resolved to its absolute latest
+// released version (see Options.Update).
+func Pin(ctx context.Context, content string, r Resolver, opts Options) (Result, error) {
 	// Preserve the original line endings/structure by splitting on "\n".
 	lines := strings.Split(content, "\n")
 	var res Result
@@ -73,8 +86,14 @@ func Pin(ctx context.Context, content string, r Resolver) (Result, error) {
 			continue
 		}
 		spec, ok := orb.ParseVersion(ref.Version)
-		if !ok || spec.IsPinned() {
+		if !ok {
 			continue
+		}
+		if spec.IsPinned() && !opts.Update {
+			continue
+		}
+		if opts.Update {
+			spec = latestSpec
 		}
 
 		versions, err := r.Versions(ctx, ref.Name)
