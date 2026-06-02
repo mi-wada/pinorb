@@ -21,7 +21,7 @@ const (
 	defaultConfigDir  = ".circleci"
 )
 
-const usage = `pinorb pins CircleCI orb versions to an exact patch version.
+const usage = `pinorb pins CircleCI orbs to an exact patch version.
 
 Usage:
   pinorb run [flags] [paths...]

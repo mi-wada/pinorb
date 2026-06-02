@@ -1,5 +1,5 @@
-// Package pinner rewrites CircleCI config files, pinning orb versions to an
-// exact patch version.
+// Package pinner rewrites CircleCI config files, pinning orbs to an exact
+// patch version.
 package pinner
 
 import (

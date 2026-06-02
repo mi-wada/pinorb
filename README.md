@@ -1,9 +1,9 @@
 # pinorb
 
-`pinorb` pins CircleCI [orb](https://circleci.com/docs/orb-intro/) versions in
-your `.circleci/config.yml` to an exact patch version — the CircleCI
-counterpart to [pinact](https://github.com/suzuki-shunsuke/pinact), which does
-the same for GitHub Actions.
+`pinorb` pins the [CircleCI orbs](https://circleci.com/docs/orb-intro/) in your
+`.circleci/config.yml` to an exact patch version — the CircleCI counterpart to
+[pinact](https://github.com/suzuki-shunsuke/pinact), which does the same for
+GitHub Actions.
 
 When an orb is referenced with only a major (`@3`) or major.minor (`@5.1`)
 version, CircleCI silently resolves it to the latest matching release at build
